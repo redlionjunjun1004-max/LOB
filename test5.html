@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>도시의별시험</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --bg-void:#0a0707;
+        --panel:#191313;
+        --panel-alt:#211919;
+        --panel-inset:#141010;
+        --gold:#8a6f3f;
+        --gold-bright:#caa74a;
+        --crimson:#6f1023;
+        --crimson-bright:#9c1c34;
+        --parchment:#e7dac2;
+        --parchment-dim:#a8987d;
+        --ash:#6e6053;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    body{
+        min-height:100vh;
+        background:
+            radial-gradient(ellipse 900px 600px at 50% -10%, rgba(111,16,35,0.35), transparent 60%),
+            radial-gradient(ellipse 1200px 900px at 50% 110%, rgba(60,20,20,0.25), transparent 60%),
+            var(--bg-void);
+        color:var(--parchment);
+        font-family:'Noto Serif KR', serif;
+        display:flex; justify-content:center; align-items:center;
+        padding:40px 18px; line-height:1.6;
+    }
+    .tome{
+        width:100%; max-width:620px; background:var(--panel);
+        border:1px solid var(--gold); border-radius:2px; position:relative;
+        box-shadow:0 0 0 1px rgba(0,0,0,0.6), 0 0 60px rgba(0,0,0,0.55), inset 0 0 120px rgba(0,0,0,0.35);
+        padding:44px 38px 36px; text-align:center;
+    }
+    .corner-tl,.corner-br,.corner-tr,.corner-bl{ content:''; position:absolute; width:22px; height:22px; border:2px solid var(--gold-bright); opacity:0.85; }
+    .corner-bl{ top:8px; left:8px; border-right:none; border-bottom:none; }
+    .corner-tr{ bottom:8px; right:8px; border-left:none; border-top:none; }
+    .corner-tl{ top:8px; right:8px; border-left:none; border-bottom:none; }
+    .corner-br{ bottom:8px; left:8px; border-right:none; border-top:none; }
+
+    .eyebrow{ font-family:'Cinzel', serif; font-size:0.7rem; letter-spacing:0.35em; color:var(--ash); margin-bottom:12px; }
+    h1{ font-family:'Cinzel Decorative','Noto Serif KR', serif; font-size:1.7rem; color:var(--parchment); text-shadow:0 0 18px rgba(202,167,74,0.25); }
+    .user-info{
+        display:inline-block; margin-top:16px; margin-bottom:28px;
+        color:var(--gold-bright); font-weight:700; font-size:0.92rem;
+        background:var(--panel-inset); border:1px solid var(--gold);
+        padding:7px 16px; border-radius:1px; letter-spacing:0.02em;
+    }
+
+    .discord-box{
+        background:var(--panel-inset); border:1px solid var(--gold); border-radius:1px;
+        padding:18px 20px; margin-bottom:26px; text-align:left;
+        display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+    }
+    .discord-box .d-label{ font-family:'Cinzel', serif; font-size:0.7rem; letter-spacing:0.2em; color:var(--gold-bright); display:block; margin-bottom:6px; }
+    .discord-box .d-desc{ color:var(--parchment-dim); font-size:0.88rem; }
+    .discord-btn{
+        display:inline-flex; align-items:center; gap:8px;
+        font-family:'Noto Serif KR', serif; font-weight:700; font-size:0.92rem;
+        background:#4752C4; color:#fff; border:1px solid var(--gold-bright);
+        padding:10px 18px; border-radius:1px; cursor:pointer; text-decoration:none;
+        transition:all .2s ease; white-space:nowrap;
+    }
+    .discord-btn:hover{ background:#5865F2; box-shadow:0 0 16px rgba(88,101,242,0.45); }
+    .discord-connected{
+        display:inline-flex; align-items:center; gap:8px;
+        color:var(--gold-bright); font-weight:700; font-size:0.92rem;
+        background:rgba(202,167,74,0.1); border:1px solid var(--gold-bright);
+        padding:9px 16px; border-radius:1px; white-space:nowrap;
+    }
+
+    .quiz-box{
+        background:var(--panel-inset); border:1px solid var(--gold); border-left:3px solid var(--crimson-bright);
+        border-radius:1px; padding:26px 22px; text-align:left; margin-bottom:26px; position:relative;
+    }
+    .quiz-box .q-label{ font-family:'Cinzel', serif; font-size:0.7rem; letter-spacing:0.2em; color:var(--gold-bright); display:block; margin-bottom:10px; }
+    .quiz-box h3{ font-family:'Noto Serif KR', serif; font-weight:700; font-size:1.08rem; color:var(--parchment); margin-bottom:14px; }
+    .quiz-img{ display:block; max-width:100%; height:auto; margin:14px 0; border-radius:1px; border:1px solid var(--gold); }
+    .input-text{
+        width:100%; padding:11px 13px; font-size:1rem; font-family:'Noto Serif KR', serif;
+        background:var(--bg-void); color:var(--parchment); border:1px solid var(--ash);
+        border-radius:1px; margin-top:8px; outline:none; transition:border-color .2s;
+    }
+    .input-text:focus{ border-color:var(--gold-bright); box-shadow:0 0 0 3px rgba(202,167,74,0.12); }
+    .input-text::placeholder{ color:var(--ash); }
+
+    .btn-group{ display:flex; justify-content:center; gap:14px; margin-top:8px; flex-wrap:wrap; }
+    .submit-btn, .back-btn{
+        font-family:'Noto Serif KR', serif; font-weight:700; font-size:0.98rem;
+        padding:12px 26px; border-radius:1px; cursor:pointer; text-decoration:none;
+        letter-spacing:0.02em; transition:all .2s ease; border:1px solid transparent;
+    }
+    .submit-btn{ background:var(--crimson); color:var(--parchment); border-color:var(--gold-bright); }
+    .submit-btn:hover{ background:var(--crimson-bright); box-shadow:0 0 16px rgba(156,28,52,0.4); }
+    .back-btn{ background:transparent; color:var(--parchment-dim); border-color:var(--gold); }
+    .back-btn:hover{ color:var(--parchment); border-color:var(--gold-bright); background:rgba(202,167,74,0.08); }
+</style>
+</head>
+<body>
+    <div class="tome">
+        <div class="corner-tl"></div><div class="corner-tr"></div><div class="corner-bl"></div><div class="corner-br"></div>
+
+        <div class="eyebrow">CONTEST&nbsp;PAGE&nbsp;V</div>
+        <h1>✨ 도시의별시험</h1>
+        <div class="user-info">응시자: <span id="user-name">Loading...</span> 님</div>
+
+        <div class="discord-box">
+            <div>
+                <span class="d-label">DISCORD&nbsp;LINK</span>
+                <span class="d-desc" id="discordDesc">시험을 클리어하면 디스코드 역할이 지급됩니다. 먼저 계정을 연동해 주세요.</span>
+            </div>
+            <div id="discordArea">
+                <button class="discord-btn" id="discordLoginBtn" onclick="loginWithDiscord()">🔗 Discord로 연동하기</button>
+            </div>
+        </div>
+
+        <div class="quiz-box">
+            <span class="q-label">QUESTION</span>
+            <h3>Q1. 이 환상체의 이름은? (주관식)</h3>
+            <img src="./5-1.png" alt="Q1 이미지" class="quiz-img">
+            <input type="text" id="ans1" class="input-text" placeholder="정답을 입력하세요">
+        </div>
+
+        <div class="btn-group">
+            <button class="submit-btn" onclick="submitTest()">시험 제출 및 종료</button>
+            <a href="index.html" class="back-btn">취소하고 돌아가기</a>
+        </div>
+    </div>
+
+    <script>
+        // ====== 디스코드 연동 설정 (여기 두 값만 채워주세요) ======
+        const DISCORD_CLIENT_ID = '1550058589643612231'; // 디스코드 개발자 포털 > OAuth2 > Client ID
+        const DISCORD_REDIRECT_URI = window.location.origin + window.location.pathname; // 이 test5.html 주소. 저장소 이름을 'redlionjunjun1004-max.github.io'로 만들면 이 주소는 https://redlionjunjun1004-max.github.io/test5.html 가 됩니다
+        // 다른 이름의 저장소를 쓰셨다면 https://redlionjunjun1004-max.github.io/저장소명/test5.html 형태가 됩니다.
+        // 어느 쪽이든 이 값은 자동으로 계산되니, 실제로 브라우저 주소창에 뜨는 주소를 그대로 디스코드 개발자 포털 Redirects에 등록하면 됩니다.
+        // =========================================================
+
+        // ====== 순차 잠금 설정 ======
+        const PREV_CLEAR_KEY = 'cleared_test4';
+        const THIS_CLEAR_KEY = 'cleared_test5';
+        // ============================
+
+        // ====== 정답 설정 ======
+        const CORRECT_ANSWER = '묵직한 소리';
+        // ========================
+
+        function normalizeAnswer(str) {
+            return str.trim().replace(/\s+/g, ' ');
+        }
+
+        const nickname = localStorage.getItem('currentNickname');
+        const examTitle = localStorage.getItem('currentExamTitle') || '도시의별시험';
+
+        if (!nickname || nickname.trim() === '') {
+            alert('닉네임을 먼저 입력해야 시험에 응시할 수 있습니다!');
+            window.location.href = 'index.html';
+        } else if (PREV_CLEAR_KEY && localStorage.getItem(PREV_CLEAR_KEY) !== 'true') {
+            alert('이전 시험을 먼저 클리어해야 이 시험에 응시할 수 있습니다!');
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('user-name').innerText = nickname;
+        }
+
+        let discordUser = null; // { id, username }
+
+        function loginWithDiscord() {
+            const params = new URLSearchParams({
+                client_id: DISCORD_CLIENT_ID,
+                redirect_uri: DISCORD_REDIRECT_URI,
+                response_type: 'token',
+                scope: 'identify'
+            });
+            window.location.href = `https://discord.com/oauth2/authorize?${params.toString()}`;
+        }
+
+        function renderDiscordConnected() {
+            document.getElementById('discordArea').innerHTML =
+                `<span class="discord-connected">✅ 연동됨: ${discordUser.username}</span>`;
+            document.getElementById('discordDesc').innerText = '연동이 완료되었습니다. 시험 제출 시 역할이 자동으로 지급됩니다.';
+        }
+
+        async function handleDiscordRedirect() {
+            // 리다이렉트 직후 URL 뒤에 붙는 #access_token=... 조각을 확인
+            if (window.location.hash.includes('access_token')) {
+                const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                const accessToken = hashParams.get('access_token');
+                history.replaceState(null, '', window.location.pathname); // 주소창에서 토큰 흔적 제거
+
+                if (accessToken) {
+                    try {
+                        const res = await fetch('https://discord.com/api/users/@me', {
+                            headers: { Authorization: `Bearer ${accessToken}` }
+                        });
+                        const user = await res.json();
+                        discordUser = { id: user.id, username: `${user.username}${user.discriminator && user.discriminator !== '0' ? '#' + user.discriminator : ''}` };
+                        sessionStorage.setItem('discordUser', JSON.stringify(discordUser));
+                        renderDiscordConnected();
+                    } catch (err) {
+                        console.error(err);
+                        alert('디스코드 연동 중 오류가 발생했습니다. 다시 시도해 주세요.');
+                    }
+                }
+            } else {
+                // 새로고침 등으로 페이지를 다시 열었을 때 이전 연동 정보 복원
+                const saved = sessionStorage.getItem('discordUser');
+                if (saved) {
+                    discordUser = JSON.parse(saved);
+                    renderDiscordConnected();
+                }
+            }
+        }
+        handleDiscordRedirect();
+
+        function submitTest() {
+            const answer1 = document.getElementById('ans1').value.trim();
+
+            if (!answer1) {
+                alert('문제의 답을 입력해 주세요!');
+                return;
+            }
+            if (!discordUser) {
+                alert('역할 지급을 위해 먼저 Discord 계정을 연동해 주세요!');
+                return;
+            }
+            if (normalizeAnswer(answer1) !== normalizeAnswer(CORRECT_ANSWER)) {
+                alert('❌ 오답입니다. 다시 확인해 주세요!');
+                return;
+            }
+
+            const now = new Date();
+            const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+            const logJsonFormat = {
+                "userId": nickname,
+                "examTitle": examTitle,
+                "answer1": answer1,
+                "submittedAt": timeString,
+                "discordId": discordUser.id,
+                "discordUsername": discordUser.username,
+                "grantRole": true
+            };
+
+            // ⚠️ Code.gs를 새로 배포하셨다면, 아래 URL을 그 웹 앱의 /exec 주소로 교체해 주세요.
+            fetch('https://script.google.com/macros/s/AKfycbw_RLM7ME-ka75gG5MOXZUsKx-unXUmMFo2WwY1DgmwDZ7pxf2ceqYfkYKFmDKtgWTZ7g/exec', {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(logJsonFormat)
+            })
+            .then(() => {
+                const existingLogs = JSON.parse(localStorage.getItem('log.json')) || [];
+                existingLogs.push(logJsonFormat);
+                localStorage.setItem('log.json', JSON.stringify(existingLogs));
+                localStorage.setItem(THIS_CLEAR_KEY, 'true');
+
+                alert('시험 답안이 제출되었습니다! 잠시 후 디스코드 역할이 지급됩니다.');
+                window.location.href = 'index.html';
+            })
+            .catch(err => {
+                alert('네트워크 오류가 발생했습니다.');
+                console.error(err);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>도서관 콘테스트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cinzel+Decorative:wght@700&family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --bg-void:#0a0707;
+        --panel:#191313;
+        --panel-alt:#211919;
+        --panel-inset:#141010;
+        --gold:#8a6f3f;
+        --gold-bright:#caa74a;
+        --crimson:#6f1023;
+        --crimson-bright:#9c1c34;
+        --parchment:#e7dac2;
+        --parchment-dim:#a8987d;
+        --ash:#6e6053;
+    }
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ min-height:100%; }
+    body{
+        background:
+            radial-gradient(ellipse 900px 600px at 50% -10%, rgba(111,16,35,0.35), transparent 60%),
+            radial-gradient(ellipse 1200px 900px at 50% 110%, rgba(60,20,20,0.25), transparent 60%),
+            var(--bg-void);
+        color:var(--parchment);
+        font-family:'Noto Serif KR', serif;
+        display:flex;
+        justify-content:center;
+        padding:56px 18px;
+        line-height:1.6;
+    }
+
+    .tome{
+        width:100%;
+        max-width:960px;
+        background:var(--panel);
+        border:1px solid var(--gold);
+        border-radius:2px;
+        position:relative;
+        box-shadow:
+            0 0 0 1px rgba(0,0,0,0.6),
+            0 0 60px rgba(0,0,0,0.55),
+            inset 0 0 120px rgba(0,0,0,0.35);
+        padding:52px 48px 44px;
+    }
+    /* ornate corner marks */
+    .tome::before,.tome::after,
+    .corner-tl,.corner-br{ content:''; position:absolute; width:22px; height:22px; border:2px solid var(--gold-bright); opacity:0.85; }
+    .tome::before{ top:8px; left:8px; border-right:none; border-bottom:none; }
+    .tome::after{ bottom:8px; right:8px; border-left:none; border-top:none; }
+    .corner-tl{ top:8px; right:8px; border-left:none; border-bottom:none; }
+    .corner-br{ bottom:8px; left:8px; border-right:none; border-top:none; }
+
+    .mode-toggle{ position:absolute; top:18px; right:18px; display:flex; gap:8px; z-index:5; }
+    .seal-btn{
+        font-family:'Noto Serif KR', serif; font-size:0.78rem; font-weight:600;
+        background:transparent; color:var(--parchment-dim);
+        border:1px solid var(--gold); padding:7px 12px; border-radius:1px;
+        cursor:pointer; letter-spacing:0.04em; transition:all .2s ease;
+    }
+    .seal-btn:hover{ color:var(--parchment); border-color:var(--gold-bright); background:rgba(202,167,74,0.08); }
+    .seal-btn.danger{ border-color:var(--crimson-bright); color:#d68a97; }
+    .seal-btn.danger:hover{ background:rgba(156,28,52,0.15); color:#f0b9c2; }
+    .admin-only{ display:none; }
+
+    .masthead{ text-align:center; margin-bottom:38px; }
+    .masthead .eyebrow{
+        font-family:'Cinzel', serif; font-size:0.72rem; letter-spacing:0.35em;
+        color:var(--ash); margin-bottom:14px;
+    }
+    .masthead h1{
+        font-family:'Cinzel Decorative','Noto Serif KR', serif;
+        font-weight:700; font-size:2.3rem; color:var(--parchment);
+        display:inline-flex; align-items:center; gap:12px;
+        text-shadow:0 0 18px rgba(202,167,74,0.25);
+    }
+    .masthead h1 .glyph{ color:var(--gold-bright); font-size:1.5rem; }
+    .admin-seal{
+        font-family:'Cinzel', serif; font-size:0.68rem; letter-spacing:0.12em;
+        background:var(--crimson); color:var(--parchment);
+        border:1px solid var(--gold-bright); padding:4px 10px; border-radius:1px;
+        vertical-align:middle;
+    }
+    .masthead p{ color:var(--parchment-dim); margin-top:14px; font-size:1rem; }
+
+    .name-plate{
+        background:var(--panel-inset);
+        border:1px solid var(--gold);
+        border-radius:2px;
+        padding:26px 24px;
+        text-align:center;
+        margin-bottom:38px;
+        position:relative;
+    }
+    .name-plate label{
+        display:block; font-size:0.95rem; color:var(--gold-bright);
+        font-weight:600; margin-bottom:14px; letter-spacing:0.02em;
+    }
+    .name-plate input{
+        width:100%; max-width:360px; text-align:center;
+        background:var(--bg-void); color:var(--parchment);
+        border:1px solid var(--ash); border-radius:1px;
+        padding:12px 14px; font-size:1.05rem; font-family:'Noto Serif KR', serif;
+        outline:none; transition:border-color .2s;
+    }
+    .name-plate input:focus{ border-color:var(--gold-bright); box-shadow:0 0 0 3px rgba(202,167,74,0.12); }
+    .name-plate input::placeholder{ color:var(--ash); }
+
+    .page-grid{
+        display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:14px; margin-bottom:40px;
+    }
+    .page-card{
+        position:relative; background:var(--panel-alt);
+        border:1px solid var(--gold); border-radius:1px;
+        padding:22px 16px 18px; cursor:pointer; text-align:left;
+        color:var(--parchment); font-family:'Noto Serif KR', serif;
+        transition:all .2s ease; overflow:hidden;
+    }
+    .page-card::before{
+        content:attr(data-num); position:absolute; top:10px; right:14px;
+        font-family:'Cinzel', serif; font-size:1.6rem; color:rgba(202,167,74,0.18);
+        font-weight:700;
+    }
+    .page-card .num-label{
+        font-family:'Cinzel', serif; font-size:0.72rem; letter-spacing:0.2em;
+        color:var(--gold-bright); display:block; margin-bottom:8px;
+    }
+    .page-card .title{ font-size:1.08rem; font-weight:700; color:var(--parchment); }
+    .page-card::after{
+        content:''; position:absolute; left:0; bottom:0; width:100%; height:2px;
+        background:var(--crimson); transform:scaleX(0); transform-origin:left;
+        transition:transform .25s ease;
+    }
+    .page-card:hover{ border-color:var(--gold-bright); background:#291d1d; transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,0.4); }
+    .page-card:hover::after{ transform:scaleX(1); }
+    .page-card.cleared{ border-color:var(--gold-bright); }
+    .page-card.cleared .num-label::after{ content:' · 클리어'; color:var(--gold-bright); }
+    .page-card.locked{ cursor:not-allowed; opacity:0.45; filter:grayscale(0.6); }
+    .page-card.locked:hover{ transform:none; background:var(--panel-alt); box-shadow:none; border-color:var(--gold); }
+    .page-card.locked:hover::after{ transform:scaleX(0); }
+    .page-card.locked .title::before{ content:'🔒 '; }
+
+    .divider{
+        display:flex; align-items:center; gap:14px; margin:44px 0 26px; color:var(--ash);
+    }
+    .divider::before,.divider::after{ content:''; flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--gold), transparent); }
+    .divider span{ font-family:'Cinzel', serif; font-size:0.75rem; letter-spacing:0.25em; }
+
+    .log-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; gap:12px; flex-wrap:wrap; }
+    .log-head h4{ font-family:'Cinzel','Noto Serif KR', serif; font-size:1.05rem; color:var(--parchment); }
+    .log-head .actions{ display:flex; gap:8px; }
+
+    .archive{ border:1px solid var(--gold); border-radius:1px; overflow:hidden; }
+    table{ width:100%; border-collapse:collapse; }
+    thead th{
+        background:var(--panel-inset); color:var(--gold-bright);
+        font-family:'Cinzel','Noto Serif KR', serif; font-weight:700; font-size:0.82rem;
+        letter-spacing:0.05em; text-align:center; padding:12px 8px;
+        border-bottom:1px solid var(--gold);
+    }
+    tbody td{
+        text-align:center; padding:11px 8px; color:var(--parchment-dim);
+        border-bottom:1px solid rgba(138,111,63,0.25); font-size:0.92rem;
+    }
+    tbody tr:nth-child(even){ background:rgba(255,255,255,0.02); }
+    tbody tr:hover{ background:rgba(202,167,74,0.05); }
+    tbody td.nick{ color:var(--parchment); font-weight:700; }
+    .empty-row td{ padding:26px; color:var(--ash); font-style:italic; }
+    .del-btn{
+        background:transparent; color:#d68a97; border:1px solid var(--crimson-bright);
+        padding:4px 10px; font-size:0.78rem; border-radius:1px; cursor:pointer; font-family:'Noto Serif KR',serif;
+        transition:all .2s;
+    }
+    .del-btn:hover{ background:var(--crimson); color:var(--parchment); }
+
+    @media (max-width:560px){
+        .tome{ padding:34px 20px 30px; }
+        .masthead h1{ font-size:1.6rem; }
+        .mode-toggle{ position:static; justify-content:center; margin-bottom:22px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="tome">
+    <div class="corner-tl"></div><div class="corner-br"></div>
+
+    <div class="mode-toggle">
+        <button id="toggleAdminBtn" class="seal-btn" onclick="toggleAdminMode()">관리자 모드 전환</button>
+        <button id="exitAdminBtn" class="seal-btn danger admin-only" onclick="exitAdminMode()">관리자 로그아웃</button>
+    </div>
+
+    <div class="masthead">
+        <div class="eyebrow">LIBRARY&nbsp;CONTEST&nbsp;ARCHIVE</div>
+        <h1><span class="glyph">✦</span>콘테스트<span id="adminTitleBadge" class="admin-seal admin-only">ADMIN</span></h1>
+        <p>닉네임을 입력하신 후 응시할 시험을 선택해 주세요.</p>
+    </div>
+
+    <div class="name-plate">
+        <label for="nickname">수험자 닉네임 입력</label>
+        <input type="text" id="nickname" placeholder="닉네임을 적어주세요">
+    </div>
+
+    <div class="page-grid">
+        <button class="page-card" data-num="I" data-clear-key="cleared_test1" data-prev-key="" onclick="startExam('도시괴담시험')">
+            <span class="num-label">PAGE&nbsp;I</span>
+            <span class="title">도시괴담시험</span>
+        </button>
+        <button class="page-card" data-num="II" data-clear-key="cleared_test2" data-prev-key="cleared_test1" onclick="startExam('도시전설시험')">
+            <span class="num-label">PAGE&nbsp;II</span>
+            <span class="title">도시전설시험</span>
+        </button>
+        <button class="page-card" data-num="III" data-clear-key="cleared_test3" data-prev-key="cleared_test2" onclick="startExam('도시질병시험')">
+            <span class="num-label">PAGE&nbsp;III</span>
+            <span class="title">도시질병시험</span>
+        </button>
+        <button class="page-card" data-num="IV" data-clear-key="cleared_test4" data-prev-key="cleared_test3" onclick="startExam('도시악몽시험')">
+            <span class="num-label">PAGE&nbsp;IV</span>
+            <span class="title">도시악몽시험</span>
+        </button>
+        <button class="page-card" data-num="V" data-clear-key="cleared_test5" data-prev-key="cleared_test4" onclick="startExam('도시의별시험')">
+            <span class="num-label">PAGE&nbsp;V</span>
+            <span class="title">도시의별시험</span>
+        </button>
+    </div>
+
+    <div class="divider"><span>ARCHIVE&nbsp;RECORD</span></div>
+
+    <div class="log-head">
+        <h4>제출 현황 (관리자 전용 데이터 기반)</h4>
+        <div class="actions">
+            <button class="seal-btn admin-only" onclick="downloadLogFile()">log.json 파일 추출</button>
+            <button class="seal-btn danger admin-only" onclick="clearAllData()">전체 데이터 초기화</button>
+        </div>
+    </div>
+
+    <div class="archive">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width:25%;">닉네임</th>
+                    <th style="width:40%;">응시 시험</th>
+                    <th style="width:20%;">제출 시간</th>
+                    <th style="width:15%;" class="admin-only">관리</th>
+                </tr>
+            </thead>
+            <tbody id="resultTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let isAdmin = false;
+    const ADMIN_PASSWORD = "1234";
+
+    function toggleAdminMode() {
+        const password = prompt("관리자 비밀번호를 입력하세요:");
+        if (password === ADMIN_PASSWORD) { isAdmin = true; applyModeStyles(); }
+        else if (password !== null) { alert("비밀번호가 일치하지 않습니다."); }
+    }
+    function exitAdminMode() { isAdmin = false; applyModeStyles(); }
+    function applyModeStyles() {
+        const adminElements = document.querySelectorAll('.admin-only');
+        if (isAdmin) {
+            adminElements.forEach(el => el.style.setProperty('display', 'inline-block', 'important'));
+            document.querySelectorAll('th.admin-only, td.admin-only').forEach(el => el.style.setProperty('display', 'table-cell', 'important'));
+            document.getElementById('toggleAdminBtn').style.display = 'none';
+        } else {
+            adminElements.forEach(el => el.style.setProperty('display', 'none', 'important'));
+            document.getElementById('toggleAdminBtn').style.display = 'inline-block';
+        }
+        loadHistory();
+    }
+
+    function startExam(examTitle) {
+        const routes = {
+            '도시괴담시험': 'test1.html',
+            '도시전설시험': 'test2.html',
+            '도시질병시험': 'test3.html',
+            '도시악몽시험': 'test4.html',
+            '도시의별시험': 'test5.html'
+        };
+        const card = document.querySelector(`.page-card[onclick="startExam('${examTitle}')"]`);
+        const prevKey = card ? card.dataset.prevKey : '';
+        if (prevKey && localStorage.getItem(prevKey) !== 'true') {
+            alert('이전 시험을 먼저 클리어해야 이 시험에 응시할 수 있습니다.');
+            return;
+        }
+
+        const nickname = document.getElementById('nickname').value.trim();
+        if (!nickname) { alert('닉네임을 먼저 입력해 주세요.'); return; }
+
+        localStorage.setItem('currentNickname', nickname);
+        localStorage.setItem('currentExamTitle', examTitle);
+
+        window.location.href = routes[examTitle] || (alert('준비 중인 시험입니다.'), null);
+    }
+
+    function applyExamLocks() {
+        document.querySelectorAll('.page-card').forEach(card => {
+            const clearKey = card.dataset.clearKey;
+            const prevKey = card.dataset.prevKey;
+            const isCleared = clearKey && localStorage.getItem(clearKey) === 'true';
+            const isLocked = prevKey && localStorage.getItem(prevKey) !== 'true';
+
+            card.classList.toggle('cleared', !!isCleared);
+            card.classList.toggle('locked', !!isLocked);
+        });
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem('log.json')) || [];
+        const tableBody = document.getElementById('resultTableBody');
+        tableBody.innerHTML = '';
+
+        if (history.length === 0) {
+            tableBody.innerHTML = `<tr class="empty-row"><td colspan="4">아직 제출된 기록이 없습니다.</td></tr>`;
+            return;
+        }
+
+        const displayHistory = [...history].reverse();
+        displayHistory.forEach((item, index) => {
+            const originalIndex = history.length - 1 - index;
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td class="nick">${item.userId}</td>
+                <td>${item.examTitle} - (답안 저장됨)</td>
+                <td>${item.submittedAt || '-'}</td>
+                <td class="admin-only" style="display:${isAdmin ? 'table-cell' : 'none'} !important">
+                    <button class="del-btn" onclick="deleteRow(${originalIndex})">삭제</button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+        });
+        applyAdminCellVisibility();
+    }
+
+    function applyAdminCellVisibility() {
+        document.querySelectorAll('td.admin-only, th.admin-only').forEach(el => {
+            el.style.setProperty('display', isAdmin ? 'table-cell' : 'none', 'important');
+        });
+    }
+
+    function deleteRow(idx) {
+        let history = JSON.parse(localStorage.getItem('log.json')) || [];
+        history.splice(idx, 1);
+        localStorage.setItem('log.json', JSON.stringify(history));
+        loadHistory();
+    }
+
+    function clearAllData() {
+        if (confirm("모든 데이터를 초기화하시겠습니까?")) {
+            localStorage.removeItem('log.json');
+            loadHistory();
+        }
+    }
+
+    function downloadLogFile() {
+        const history = JSON.parse(localStorage.getItem('log.json')) || [];
+        const blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'log.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    window.onload = () => { applyModeStyles(); loadHistory(); applyExamLocks(); };
+</script>
+</body>
+</html>
