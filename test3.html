@@ -134,11 +134,15 @@
 
     <script>
         // ====== 디스코드 연동 설정 (여기 두 값만 채워주세요) ======
-        const DISCORD_CLIENT_ID = 'Y1550058589643612231'; // 디스코드 개발자 포털 > OAuth2 > Client ID
+        const DISCORD_CLIENT_ID = '1550058589643612231'; // 디스코드 개발자 포털 > OAuth2 > Client ID
         const DISCORD_REDIRECT_URI = window.location.origin + window.location.pathname; // 이 test3.html 주소. 저장소 이름을 'redlionjunjun1004-max.github.io'로 만들면 이 주소는 https://redlionjunjun1004-max.github.io/test3.html 가 됩니다
         // 다른 이름의 저장소를 쓰셨다면 https://redlionjunjun1004-max.github.io/저장소명/test3.html 형태가 됩니다.
         // 어느 쪽이든 이 값은 자동으로 계산되니, 실제로 브라우저 주소창에 뜨는 주소를 그대로 디스코드 개발자 포털 Redirects에 등록하면 됩니다.
         // =========================================================
+
+        // ====== 역할 지급 서버(Cloudflare Worker) 주소 ======
+        const WORKER_URL = 'lob.redlionjunjun1004.workers.dev';
+        // ====================================================
 
         // ====== 순차 잠금 설정 ======
         const PREV_CLEAR_KEY = 'cleared_test2';
@@ -245,19 +249,24 @@
                 "grantRole": true
             };
 
-            // ⚠️ Code.gs를 새로 배포하셨다면, 아래 URL을 그 웹 앱의 /exec 주소로 교체해 주세요.
-            fetch('https://script.google.com/macros/s/AKfycbyonYuTUskjZ_xtXE43XQ7oCp7xdefVgBubZ7AYuPBzswSDXUWjDPKILxmp2PHuAu62Xg/exec', {
+            fetch(WORKER_URL, {
                 method: 'POST',
-                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(logJsonFormat)
             })
-            .then(() => {
+            .then(async (res) => {
+                const result = await res.json().catch(() => ({}));
+                if (!res.ok || !result.ok) {
+                    console.error('역할 지급 실패:', result);
+                    alert('역할 지급에 실패했습니다. 디스코드 서버에 참가해 있는지 확인한 뒤 다시 시도해 주세요.');
+                    return;
+                }
                 const existingLogs = JSON.parse(localStorage.getItem('log.json')) || [];
                 existingLogs.push(logJsonFormat);
                 localStorage.setItem('log.json', JSON.stringify(existingLogs));
                 localStorage.setItem(THIS_CLEAR_KEY, 'true');
 
-                alert('시험 답안이 제출되었습니다! 잠시 후 디스코드 역할이 지급됩니다.');
+                alert('정답입니다! 디스코드 역할이 지급되었습니다.');
                 window.location.href = 'index.html';
             })
             .catch(err => {
