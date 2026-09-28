@@ -140,6 +140,10 @@
         // 어느 쪽이든 이 값은 자동으로 계산되니, 실제로 브라우저 주소창에 뜨는 주소를 그대로 디스코드 개발자 포털 Redirects에 등록하면 됩니다.
         // =========================================================
 
+        // ====== 역할 지급 서버(Cloudflare Worker) 주소 ======
+        const WORKER_URL = 'lob.redlionjunjun1004.workers.dev';
+        // ====================================================
+
         // ====== 순차 잠금 설정 ======
         const PREV_CLEAR_KEY = null;        // 이 시험은 1번째 시험이라 선행 조건이 없습니다
         const THIS_CLEAR_KEY = 'cleared_test1';
@@ -245,19 +249,24 @@
                 "grantRole": true
             };
 
-            // ⚠️ Code.gs를 새로 배포하셨다면, 아래 URL을 그 웹 앱의 /exec 주소로 교체해 주세요.
-            fetch('https://script.google.com/macros/s/AKfycbyonYuTUskjZ_xtXE43XQ7oCp7xdefVgBubZ7AYuPBzswSDXUWjDPKILxmp2PHuAu62Xg/exec', {
+            fetch(WORKER_URL, {
                 method: 'POST',
-                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(logJsonFormat)
             })
-            .then(() => {
+            .then(async (res) => {
+                const result = await res.json().catch(() => ({}));
+                if (!res.ok || !result.ok) {
+                    console.error('역할 지급 실패:', result);
+                    alert('역할 지급에 실패했습니다. 디스코드 서버에 참가해 있는지 확인한 뒤 다시 시도해 주세요.');
+                    return;
+                }
                 const existingLogs = JSON.parse(localStorage.getItem('log.json')) || [];
                 existingLogs.push(logJsonFormat);
                 localStorage.setItem('log.json', JSON.stringify(existingLogs));
                 localStorage.setItem(THIS_CLEAR_KEY, 'true');
 
-                alert('시험 답안이 제출되었습니다! 잠시 후 디스코드 역할이 지급됩니다.');
+                alert('정답입니다! 디스코드 역할이 지급되었습니다.');
                 window.location.href = 'index.html';
             })
             .catch(err => {
